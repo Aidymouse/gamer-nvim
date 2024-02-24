@@ -169,24 +169,24 @@ require('lazy').setup({
 
         -- Actions
         -- visual mode
-        map('v', '<leader>hs', function()
+        map('v', '<leader>Hs', function()
           gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
         end, { desc = 'stage git hunk' })
-        map('v', '<leader>hr', function()
+        map('v', '<leader>Hr', function()
           gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
         end, { desc = 'reset git hunk' })
         -- normal mode
-        map('n', '<leader>hs', gs.stage_hunk, { desc = 'git stage hunk' })
-        map('n', '<leader>hr', gs.reset_hunk, { desc = 'git reset hunk' })
-        map('n', '<leader>hS', gs.stage_buffer, { desc = 'git Stage buffer' })
-        map('n', '<leader>hu', gs.undo_stage_hunk, { desc = 'undo stage hunk' })
-        map('n', '<leader>hR', gs.reset_buffer, { desc = 'git Reset buffer' })
-        map('n', '<leader>hp', gs.preview_hunk, { desc = 'preview git hunk' })
-        map('n', '<leader>hb', function()
+        map('n', '<leader>Hs', gs.stage_hunk, { desc = 'git stage hunk' })
+        map('n', '<leader>Hr', gs.reset_hunk, { desc = 'git reset hunk' })
+        map('n', '<leader>HS', gs.stage_buffer, { desc = 'git Stage buffer' })
+        map('n', '<leader>Hu', gs.undo_stage_hunk, { desc = 'undo stage hunk' })
+        map('n', '<leader>HR', gs.reset_buffer, { desc = 'git Reset buffer' })
+        map('n', '<leader>Hp', gs.preview_hunk, { desc = 'preview git hunk' })
+        map('n', '<leader>Hb', function()
           gs.blame_line { full = false }
         end, { desc = 'git blame line' })
-        map('n', '<leader>hd', gs.diffthis, { desc = 'git diff against index' })
-        map('n', '<leader>hD', function()
+        map('n', '<leader>Hd', gs.diffthis, { desc = 'git diff against index' })
+        map('n', '<leader>HD', function()
           gs.diffthis '~'
         end, { desc = 'git diff against last commit' })
 
@@ -283,6 +283,9 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
+  { import = "plugins.harpoon"},
+  { import = "plugins.dap"},
+  { import = "plugins.cmake"},
 }, {})
 
 -- [[ Setting options ]]
@@ -437,9 +440,15 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
 vim.defer_fn(function()
+  
+  --require 'nvim-treesitter.install'.compilers = { 'g++', "gcc"}
+  require ('nvim-treesitter.install').compilers = {cpp="zig"}
+    
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+	
+	
+	ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -533,7 +542,7 @@ local on_attach = function(_, bufnr)
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
   nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
   nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+  --nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
   nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
   -- See `:help K` for why this keymap
@@ -557,9 +566,10 @@ end
 -- document existing key chains
 require('which-key').register {
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  --['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  ['<leader>d'] = { name = "[D]ebugger", _ = "which_key_ignore" },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-  ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+  ['<leader>H'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
   ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
   ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
@@ -569,7 +579,7 @@ require('which-key').register {
 -- required for visual <leader>hs (hunk stage) to work
 require('which-key').register({
   ['<leader>'] = { name = 'VISUAL <leader>' },
-  ['<leader>h'] = { 'Git [H]unk' },
+  ['<leader>H'] = { 'Git [H]unk' },
 }, { mode = 'v' })
 
 -- mason-lspconfig requires that these setup functions are called in this order
@@ -586,7 +596,7 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
+  clangd = {},
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
@@ -680,5 +690,9 @@ cmp.setup {
   },
 }
 
+-- Custom Maps
+--
+vim.keymap.set("n", "<leader>ds", ":DapToggleBreakpoint", {desc="Toggle Breakpoint"})
+vim.keymap.set("n", "<leader>dr", ":DapContinue<Enter>", {desc="Start / Continue Debugging"})
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
