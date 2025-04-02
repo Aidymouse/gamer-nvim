@@ -1,9 +1,18 @@
+-- Vim settings
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
+
+vim.opt.number = true
+
 require ("config.lazy")
 
-require ("mason").setup()
-require ("mason-lspconfig").setup({
-	ensure_installed = {
-		"lua_ls",
-		"pylsp"
-	}
-})
+-- require ("mason").setup()
+-- require ("mason-lspconfig").setup({
+-- 	ensure_installed = {
+-- 		"lua_ls",
+-- 		"pylsp",
+-- 		"clangd"
+-- 	}
+-- })
+
+
